@@ -1,3 +1,4 @@
+// Force deployment update
 const API_URL = '/api/students';
 
 const studentForm = document.getElementById('studentForm');
