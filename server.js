@@ -1,6 +1,6 @@
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
-dns.setServers(['8.8.8.8', '8.8.4.4']); // Bypasses local router DNS restrictions
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -62,8 +62,8 @@ app.delete('/api/students/:id', async (req, res) => {
   }
 });
 
-// Fallback route to serve index.html for any frontend route
-app.get('/*', (req, res) => {
+// Fallback middleware to serve frontend index.html (Express 5 safe)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
