@@ -1,77 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Directory</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 2rem; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 1000px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    h1 { font-size: 2rem; font-weight: 700; }
+    p.subtitle { color: #94a3b8; margin-top: 0.25rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: #1e293b; padding: 1.5rem; border-radius: 12px; border: 1px solid #334155; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    input { width: 100%; padding: 0.75rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem; }
+    input:focus { outline: 1px solid #38bdf8; border-color: #38bdf8; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    button { width: 100%; padding: 0.75rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+    button:hover { background: #7dd3fc; }
+    button:disabled { background: #0284c7; cursor: not-allowed; opacity: 0.7; }
+    .badge { background: #334155; color: #cbd5e1; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; }
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    ul { list-style: none; }
+    .student-item { background: #0f172a; border: 1px solid #334155; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+    .student-info h3 { font-size: 1rem; color: #f8fafc; }
+    .student-info p { font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem; }
+    .tag { background: #0284c7; color: #e0f2fe; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .btn-secondary { width: auto; background: transparent; border: 1px solid #334155; color: #cbd5e1; padding: 0.4rem 0.8rem; margin: 0; }
+    .btn-secondary:hover { background: #334155; }
+    .hidden { display: none !important; }
+    .state-msg { text-align: center; padding: 2rem; color: #94a3b8; }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
+
+  <div class="container">
+    <header>
       <div>
         <h1>Students</h1>
         <p class="subtitle">Manage enrollment details and records</p>
       </div>
-      <span id="studentCount" class="badge">0 total</span>
+      <span class="badge" id="studentCount">0 total</span>
     </header>
 
-    <main class="content-grid">
+    <div class="grid">
       <!-- Add Student Form -->
-      <section class="card form-card">
-        <h2>Add New Student</h2>
+      <div class="card">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1.25rem;">Add New Student</h2>
         <form id="studentForm">
-          <div class="field-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" placeholder="e.g. Alex Morgan" required />
+          <div class="form-row">
+            <div class="form-group">
+              <label>STUDENT ID</label>
+              <input type="text" id="studentId" placeholder="e.g. STU101" required>
+            </div>
+            <div class="form-group">
+              <label>SEMESTER</label>
+              <input type="number" id="semester" placeholder="e.g. 5" min="1" max="12" required>
+            </div>
           </div>
-
-          <div class="field-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" placeholder="alex@university.edu" required />
+          <div class="form-group">
+            <label>FULL NAME</label>
+            <input type="text" id="name" placeholder="e.g. Prerna Pande" required>
           </div>
-
-          <div class="field-group">
-            <label for="course">Course / Department</label>
-            <input type="text" id="course" placeholder="e.g. Computer Science" required />
+          <div class="form-group">
+            <label>EMAIL ADDRESS</label>
+            <input type="email" id="email" placeholder="e.g. prerna@example.com" required>
           </div>
-
-          <button type="submit" id="submitBtn">
-            <span>Add Student</span>
-          </button>
+          <div class="form-group">
+            <label>COURSE / DEPARTMENT</label>
+            <input type="text" id="department" placeholder="e.g. Computer Engineering" required>
+          </div>
+          <button type="submit" id="submitBtn">Add Student</button>
         </form>
-      </section>
+      </div>
 
-      <!-- Student List -->
-      <section class="card list-card">
+      <!-- Enrolled Students Directory -->
+      <div class="card">
         <div class="list-header">
-          <h2>Enrolled Students</h2>
-          <button id="refreshBtn" class="secondary-btn" title="Refresh data">
-            ↻ Refresh
-          </button>
+          <h2 style="font-size: 1.1rem;">Enrolled Students</h2>
+          <button class="btn-secondary" id="refreshBtn">↻ Refresh</button>
         </div>
 
-        <div id="loader" class="state-container hidden">
-          <div class="spinner"></div>
-          <p>Fetching records...</p>
+        <div id="loader" class="state-msg">Loading records...</div>
+        <div id="emptyState" class="state-msg hidden">
+          <p><strong>No records found</strong></p>
+          <p style="font-size: 0.85rem; margin-top: 0.5rem;">Add a student using the form to populate the directory.</p>
+        </div>
+        <div id="errorState" class="state-msg hidden" style="color: #f87171;">
+          Failed to fetch student data from server.
         </div>
 
-        <div id="emptyState" class="state-container hidden">
-          <p class="state-title">No records found</p>
-          <p class="state-desc">Add a student using the form to populate the directory.</p>
-        </div>
-
-        <div id="errorState" class="state-container hidden">
-          <p class="state-title error-text">Unable to load data</p>
-          <p class="state-desc">Check your connection or API deployment.</p>
-        </div>
-
-        <ul id="studentList" class="student-list"></ul>
-      </section>
-    </main>
+        <ul id="studentList" class="hidden"></ul>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
