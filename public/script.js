@@ -1,4 +1,4 @@
-const API_URL = 'https://student-backend-hl2x.onrender.com/api/students';
+const API_URL = '/api/students';
 
 const studentForm = document.getElementById('studentForm');
 const studentList = document.getElementById('studentList');
@@ -9,11 +9,9 @@ const loader = document.getElementById('loader');
 const emptyState = document.getElementById('emptyState');
 const errorState = document.getElementById('errorState');
 
-// Fetch students on page load
 document.addEventListener('DOMContentLoaded', fetchStudents);
 refreshBtn.addEventListener('click', fetchStudents);
 
-// Handle Form Submission
 studentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -22,9 +20,11 @@ studentForm.addEventListener('submit', async (e) => {
   submitBtn.textContent = 'Saving...';
 
   const newStudent = {
+    studentId: document.getElementById('studentId').value.trim(),
     name: document.getElementById('name').value.trim(),
     email: document.getElementById('email').value.trim(),
-    course: document.getElementById('course').value.trim(),
+    department: document.getElementById('department').value.trim(),
+    semester: Number(document.getElementById('semester').value),
   };
 
   try {
@@ -34,11 +34,13 @@ studentForm.addEventListener('submit', async (e) => {
       body: JSON.stringify(newStudent),
     });
 
+    const data = await response.json();
+
     if (response.ok) {
       studentForm.reset();
       await fetchStudents();
     } else {
-      alert('Failed to add student. Please try again.');
+      alert(`Error: ${data.error || 'Failed to add student.'}`);
     }
   } catch (error) {
     console.error('Error adding student:', error);
@@ -49,7 +51,6 @@ studentForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Fetch students from API
 async function fetchStudents() {
   showState('loading');
 
@@ -57,9 +58,7 @@ async function fetchStudents() {
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error('API response failed');
 
-    const result = await response.json();
-    const students = Array.isArray(result) ? result : result.data || [];
-
+    const students = await response.json();
     renderStudents(students);
   } catch (error) {
     console.error('Error fetching students:', error);
@@ -67,7 +66,6 @@ async function fetchStudents() {
   }
 }
 
-// Render student list items
 function renderStudents(students) {
   studentCount.textContent = `${students.length} total`;
   studentList.innerHTML = '';
@@ -84,16 +82,15 @@ function renderStudents(students) {
     li.className = 'student-item';
     li.innerHTML = `
       <div class="student-info">
-        <h3>${escapeHtml(student.name)}</h3>
-        <p>${escapeHtml(student.email)}</p>
+        <h3>${escapeHtml(student.name)} <small style="color:#94a3b8; font-weight:normal;">(#${escapeHtml(student.studentId)})</small></h3>
+        <p>${escapeHtml(student.email)} • Sem ${student.semester}</p>
       </div>
-      <span class="tag">${escapeHtml(student.course || 'General')}</span>
+      <span class="tag">${escapeHtml(student.department)}</span>
     `;
     studentList.appendChild(li);
   });
 }
 
-// Manage UI states (loading, empty, error, data)
 function showState(state) {
   loader.classList.add('hidden');
   emptyState.classList.add('hidden');
@@ -106,7 +103,6 @@ function showState(state) {
   if (state === 'data') studentList.classList.remove('hidden');
 }
 
-// Helper to prevent XSS
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, (m) => {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];

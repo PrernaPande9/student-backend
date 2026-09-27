@@ -1,111 +1,71 @@
-// Force deployment update
-const API_URL = '/api/students';
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Bypasses local router DNS restrictions
 
-const studentForm = document.getElementById('studentForm');
-const studentList = document.getElementById('studentList');
-const studentCount = document.getElementById('studentCount');
-const refreshBtn = document.getElementById('refreshBtn');
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
 
-const loader = document.getElementById('loader');
-const emptyState = document.getElementById('emptyState');
-const errorState = document.getElementById('errorState');
+const app = express();
 
-document.addEventListener('DOMContentLoaded', fetchStudents);
-refreshBtn.addEventListener('click', fetchStudents);
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-studentForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+// Serve static frontend files from 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Saving...';
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB Connected Successfully'))
+  .catch((err) => console.error('MongoDB Connection Error:', err));
 
-  const newStudent = {
-    studentId: document.getElementById('studentId').value.trim(),
-    name: document.getElementById('name').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    department: document.getElementById('department').value.trim(),
-    semester: Number(document.getElementById('semester').value),
-  };
+// Student Data Schema
+const studentSchema = new mongoose.Schema({
+  studentId: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  department: { type: String, required: true },
+  semester: { type: Number, required: true }
+});
 
+const Student = mongoose.model('Student', studentSchema);
+
+// REST API Routes
+app.post('/api/students', async (req, res) => {
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newStudent),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      studentForm.reset();
-      await fetchStudents();
-    } else {
-      alert(`Error: ${data.error || 'Failed to add student.'}`);
-    }
+    const student = new Student(req.body);
+    await student.save();
+    res.status(201).json({ success: true, message: 'Student registered successfully', student });
   } catch (error) {
-    console.error('Error adding student:', error);
-    alert('Network error. Check your connection.');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Add Student';
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 
-async function fetchStudents() {
-  showState('loading');
-
+app.get('/api/students', async (req, res) => {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) throw new Error('API response failed');
-
-    const students = await response.json();
-    renderStudents(students);
+    const students = await Student.find();
+    res.json(students);
   } catch (error) {
-    console.error('Error fetching students:', error);
-    showState('error');
+    res.status(500).json({ error: error.message });
   }
-}
+});
 
-function renderStudents(students) {
-  studentCount.textContent = `${students.length} total`;
-  studentList.innerHTML = '';
-
-  if (students.length === 0) {
-    showState('empty');
-    return;
+app.delete('/api/students/:id', async (req, res) => {
+  try {
+    await Student.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Student deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+});
 
-  showState('data');
+// Fallback route to serve index.html for any frontend route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-  students.forEach((student) => {
-    const li = document.createElement('li');
-    li.className = 'student-item';
-    li.innerHTML = `
-      <div class="student-info">
-        <h3>${escapeHtml(student.name)} <small style="color:#94a3b8; font-weight:normal;">(#${escapeHtml(student.studentId)})</small></h3>
-        <p>${escapeHtml(student.email)} • Sem ${student.semester}</p>
-      </div>
-      <span class="tag">${escapeHtml(student.department)}</span>
-    `;
-    studentList.appendChild(li);
-  });
-}
-
-function showState(state) {
-  loader.classList.add('hidden');
-  emptyState.classList.add('hidden');
-  errorState.classList.add('hidden');
-  studentList.classList.add('hidden');
-
-  if (state === 'loading') loader.classList.remove('hidden');
-  if (state === 'empty') emptyState.classList.remove('hidden');
-  if (state === 'error') errorState.classList.remove('hidden');
-  if (state === 'data') studentList.classList.remove('hidden');
-}
-
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, (m) => {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-  });
-}
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
