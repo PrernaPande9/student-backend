@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Directory</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div>
+        <h1>Students</h1>
+        <p class="subtitle">Manage enrollment details and records</p>
+      </div>
+      <span id="studentCount" class="badge">0 total</span>
+    </header>
+
+    <main class="content-grid">
+      <!-- Add Student Form -->
+      <section class="card form-card">
+        <h2>Add New Student</h2>
+        <form id="studentForm">
+          <div class="field-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="e.g. Alex Morgan" required />
+          </div>
+
+          <div class="field-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="alex@university.edu" required />
+          </div>
+
+          <div class="field-group">
+            <label for="course">Course / Department</label>
+            <input type="text" id="course" placeholder="e.g. Computer Science" required />
+          </div>
+
+          <button type="submit" id="submitBtn">
+            <span>Add Student</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Student List -->
+      <section class="card list-card">
+        <div class="list-header">
+          <h2>Enrolled Students</h2>
+          <button id="refreshBtn" class="secondary-btn" title="Refresh data">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div id="loader" class="state-container hidden">
+          <div class="spinner"></div>
+          <p>Fetching records...</p>
+        </div>
+
+        <div id="emptyState" class="state-container hidden">
+          <p class="state-title">No records found</p>
+          <p class="state-desc">Add a student using the form to populate the directory.</p>
+        </div>
+
+        <div id="errorState" class="state-container hidden">
+          <p class="state-title error-text">Unable to load data</p>
+          <p class="state-desc">Check your connection or API deployment.</p>
+        </div>
+
+        <ul id="studentList" class="student-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
