@@ -63,7 +63,7 @@ app.delete('/api/students/:id', async (req, res) => {
 });
 
 // Fallback route to serve index.html for any frontend route
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
